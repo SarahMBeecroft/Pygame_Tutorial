@@ -43,9 +43,45 @@ class Ship:
       self.laser_img = None
       self.lasers = []
       self.cool_down_counter = 0
-
+  # Draws ship onto window
   def draw(self, window):
-    pygame.draw.rect(window, (255,255,255), (self.x, self.y, 50, 50))
+    window.blit(self.ship_img, (self.x, self.y))
+
+  # Gets player ship width
+  def get_width(self):
+    return self.ship_img.get_width()
+
+  # Gets player ship height 
+  def get_height(self):
+    return self.ship_img.get_height()
+
+# Player class initialization with super constructor
+class Player(Ship):
+  def __init__(self, x, y, health=100):
+    super().__init__(x, y, health)
+    self.ship_img = YELLOW_SPACE_SHIP
+    self.laser_img = YELLOW_LASER
+    # Mask tells you where pixels are (lets you do pixel perfect collision)
+    self.mask = pygame.mask.from_surface(self.ship_img)
+    self.max_health = health # Health bar
+
+# Enemy class initialization with super constructor
+class Enemy(Ship):
+  # Color dictionary to map colors to ships
+  COLOR_MAP = {
+              "red": (RED_SPACE_SHIP, RED_LASER)
+              "green": (GREEN_SPACE_SHIP, GREEN_LASER)
+              "blue": (BLUE_SPACE_SHIP, BLUE_LASER)
+              }
+
+  def __init__(self, x, y, color, health=100):
+    super().__init__(x, y, health)
+    self.ship_img, self.laser_img = self.COLOR_MAP[color]
+    self.mask = pygame.mask.from_surface(self.ship_img) 
+
+  # Method to move ship
+  def move(self, vel):
+    self.y += vel # Moves down only
 
 
 # Game function 
@@ -58,7 +94,7 @@ def main():
   # Player moves 5 pixels every key press
   player_vel = 5
 
-  ship = Ship(300, 650)
+  player = Player(300, 650)
 
   # Clock object
   clock = pygame.time.Clock()
@@ -75,7 +111,7 @@ def main():
     WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
 
     # Draws ship onto window 
-    ship.draw(WIN)
+    player.draw(WIN)
     
 
     pygame.display.update()
@@ -93,15 +129,15 @@ def main():
     # Returns a dictionary of all keys and tells you what keys are being pressed
     keys = pygame.key.get_pressed() 
     
-    if keys[pygame.K_a] and ship.x - player_vel > 0: #left
-      ship.x -= player_vel
-    if keys[pygame.K_d] and ship.x + player_vel + 50 < WIDTH: #right
-      ship.x += player_vel
+    if keys[pygame.K_a] and player.x - player_vel > 0: #left
+      player.x -= player_vel
+    if keys[pygame.K_d] and player.x + player_vel + player.get_width() < WIDTH: #right
+      player.x += player_vel
       print('key was pressed')
-    if keys[pygame.K_w] and ship.y - player_vel > 0: #upw
-      ship.y -= player_vel
-    if keys[pygame.K_s] and ship.y + player_vel + 50 < HEIGHT: #down
-      ship.y += player_vel
+    if keys[pygame.K_w] and player.y - player_vel > 0: #upw
+      player.y -= player_vel
+    if keys[pygame.K_s] and player.y + player_vel + player.get_height() + 10 < HEIGHT: #down
+      player.y += player_vel
 
 main()
 
