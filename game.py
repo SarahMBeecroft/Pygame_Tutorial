@@ -69,8 +69,8 @@ class Player(Ship):
 class Enemy(Ship):
   # Color dictionary to map colors to ships
   COLOR_MAP = {
-              "red": (RED_SPACE_SHIP, RED_LASER)
-              "green": (GREEN_SPACE_SHIP, GREEN_LASER)
+              "red": (RED_SPACE_SHIP, RED_LASER),
+              "green": (GREEN_SPACE_SHIP, GREEN_LASER),
               "blue": (BLUE_SPACE_SHIP, BLUE_LASER)
               }
 
@@ -88,9 +88,15 @@ class Enemy(Ship):
 def main():
   run = True
   FPS = 60 
-  level = 1
+  level = 0
   lives = 3
   main_font = pygame.font.SysFont("ariel", 50)
+
+  # Stores enemies and initializes starting wave length and velocity 
+  enemies = []
+  wave_length = 5
+  enemy_vel = 1
+
   # Player moves 5 pixels every key press
   player_vel = 5
 
@@ -110,16 +116,26 @@ def main():
     WIN.blit(lives_label, (10, 10))
     WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
 
+    # Inherits from ship's draw method and draws enemy onto screen
+    for enemy in enemies:
+      enemy.draw(WIN)
+    
     # Draws ship onto window 
     player.draw(WIN)
-    
 
     pygame.display.update()
 
   while run:
     # Ensure game runs at clock speed of set FPS
     clock.tick(FPS)
-    redraw_window()
+
+    # Once wave of enemies is defeated, increment level
+    if len(enemies) == 0:
+      level += 1
+      wave_length += 5 # Adds 5 more enemies each wave
+      for i in range(wave_length):
+        enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1500, -100), random.choice(["red", "blue", "green"]))
+        enemies.append(enemy) #Appends to enemy list
 
     for event in pygame.event.get():
       # Game will stop running when window is closed 
@@ -138,6 +154,12 @@ def main():
       player.y -= player_vel
     if keys[pygame.K_s] and player.y + player_vel + player.get_height() + 10 < HEIGHT: #down
       player.y += player_vel
+
+    # Movies enemies from enemies list
+    for enemy in enemies:
+      enemy.move(enemy_vel)
+
+    redraw_window()
 
 main()
 
